@@ -1,6 +1,5 @@
 import styles from "./SearchBar.module.css";
 import toast from "react-hot-toast";
-// Toaster потрібно додати до App
 
 interface SearchBarProps {
   onSubmit: (value: string) => void;
