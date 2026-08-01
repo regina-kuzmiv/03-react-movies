@@ -1,5 +1,9 @@
-import toast from "react-hot-toast";
+import css from "./ErrorMessage.module.css";
 
 export default function ErrorMessage() {
-  return toast.error("No movies found for your request.");
+  return (
+    <div>
+      <p className={css.text}>There was an error, please try again...</p>
+    </div>
+  );
 }

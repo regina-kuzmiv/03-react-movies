@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export async function fetchMovies(query: string) {
+export default async function fetchMovies(query: string) {
   const response = await axios.get(
     "https://api.themoviedb.org/3/search/movie",
     {

@@ -1,38 +1,67 @@
-// Якщо в результаті запиту масив фільмів порожній, виводьте повідомлення:
-// No movies found for your request.
-// Ця перевірка виконується в App при обробці HTTP-запиту. Для сповіщень використовуйте бібліотеку React Hot Toast.
-// При кожному новому пошуку колекція фільмів з попереднього пошуку повинна очищати
-
-import { Toaster } from "react-hot-toast";
 import { useState } from "react";
-import ErrorMessage from "../ErrorMessage/ErrorMessage";
-import SearchBar from "../SearchBar/SearchBar";
-import { MovieGallery } from "../";
-import { fetchMovies } from "../api/movies-api";
-import type { Movie } from "../types/movie";
+import toast, { Toaster } from "react-hot-toast";
 
-export default function App() {
-  return (
-    <>
-      <Toaster />
-    </>
-  );
-}
+import SearchBar from "../SearchBar/SearchBar";
+import MovieGrid from "../MovieGrid/MovieGrid";
+import MovieModal from "../MovieModal/MovieModal";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import Loader from "../Loader/Loader";
+
+import fetchMovies from "../../services/movieService";
+import type { Movie } from "../../types/movie";
 
 export default function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function handleSearch(query: string) {
-    const data = await fetchMovies(query);
+    setMovies([]);
+    setError(false);
+    setLoading(true);
 
-    setMovies(data.results);
+    try {
+      const data = await fetchMovies(query);
+
+      if (data.results.length === 0) {
+        toast.error("No movies found for your request.");
+        return;
+      }
+
+      setMovies(data.results);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleSelectMovie(movie: Movie) {
+    setSelectedMovie(movie);
+  }
+
+  function handleCloseModal() {
+    setSelectedMovie(null);
   }
 
   return (
     <>
       <SearchBar onSubmit={handleSearch} />
 
-      <MovieGallery movies={movies} />
+      {loading && <Loader />}
+
+      {error && <ErrorMessage />}
+
+      {!loading && !error && movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={handleSelectMovie} />
+      )}
+
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
+      )}
+
+      <Toaster />
     </>
   );
 }
